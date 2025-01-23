@@ -1,0 +1,15 @@
+select * from dba_tab_col_statistics where table_name='TXN_ID_LKUP';	adimu12	1475753027063	SQL	4	0.928
+select * from dba_tab_columns where table_name='DBA_SQL_PLAN_DIRECTIVES'	adimp1_rtp	1475244019137	SQL	1	0.968
+SELECT DBMS_STATS.create_extended_stats('ADIMFACODSUAT01','TXN_ID_LKUP','(UNQ_TXN_MEMO_N,CNCL_I,SRC_C)')
+FROM   dual;	adimu12	1475237137328	SQL	1	2.021
+SELECT DBMS_STATS.report_col_usage('ADIMFACODSUAT01', 'TXN_ID_LKUP')
+FROM   dual;	adimu12	1475236061298	SQL	1	0.531
+select * from dba_tab_columns where table_name='TRD_TXN' order by density;	adimp1_rtp	1475235685425	SQL	1	1.358
+SELECT * 
+FROM   dba_stat_extensions
+WHERE  table_name = 'TRD_TXN';	adimp1_rtp	1475235646226	SQL	1	0.889
+SELECT extension_name, extension
+FROM   dba_stat_extensions
+WHERE  table_name = 'TRD_TXN';	adimp1_rtp	1475235445123	SQL	1	1.175
+
+exec DBMS_STATS.drop_extended_stats('ADIMFACODSUAT01','TXN_ID_LKUP','(UNQ_TXN_MEMO_N,CNCL_I,SRC_C)');

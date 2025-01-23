@@ -1,0 +1,5 @@
+#check for Feb 13 9am
+ls -ltrh *.arc | grep 'g2902uspsdwh01p ' | awk '{print "ls -l", $9}' | sh
+
+#delete feb 13 9am
+ls -ltrh *.dbf | grep 'Feb 13 09:' | awk '{print "rm", $9}' | sh

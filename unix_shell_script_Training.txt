@@ -1,0 +1,773 @@
+cat > file
+this is a testfile
+this is for practice
+> ctrl+d (to save and exit)
+
+
+cat /etc/passwd (to check password file)
+ls --help( for help )
+man -k copy(search the manual for keyword copy)
+
+ls -ld (to see directory permission)
+ls -F (display directory with /)
+ls -lR (displays all file contents in a folder recursive)
+cat -n <filname> (displays line number)
+cat -b <filename> (displays line number ignoring the empty lines)
+cat -s <filename> (squeeze empty lines)
+rm -i <filname> ( -i asks for confirmation)
+rm -ri <directory ( -r recursive)
+ls [a-e]* (displays all files starting from a to e)
+ls [!a-e]* (displays all files not starting from a to e)
+ls ? (displays single character filename)
+ls ?? ( two charachter filenam)
+
+convert:
+tr [a-z] [A-Z] < a.txt (converts small to capital text from a.txt)
+
+< (input)
+> (redirect output)
+>> (append)
+2>&1 ( redirect both error and output)
+
+cat -n /etc/passwd |head -15 | tail -5 (displays 11 to 15 lines in the file)
+cat -n /etc/passwd | tail -2 |head -1 (display 2nd last line in the file)
+
+grep
+grep bash$ /etc/passwd ( all regular user in the server. $ specifies ending with)
+grep -w giri <filename> (only the word giri)
+grep -i giri <filneame> (no cagrese sensitive)
+grep -v giri <filename> (other than giri)
+grep -A2 giri <filename> ( A for after , print 2 lines after giri)
+grep -B2 giri <filename > ( B for before)
+grep -c giri <filename> (number of lines wher giri present and not number of times)
+wc -l <filename> {number of lines)
+wc - w <filename> (number of words)
+wc -c <filename> (bytes)
+grep bash$ /etc/passwd |wc -l >user_count (number of regular users)
+
+egrep: (more than one keyword can be searched)
+grep "root|student" /etc/passwd
+
+fgrep: even special characters are included in searching
+fgrep ^rakshith <filename>
+
+cut:
+cut -f1 -d" " <filename> (display only first field delimited by space)
+cut -f6 -d: <filename> (display only sixth field delimited by colon)
+cut -c3 <filename> (cut the third character (by default first field))
+
+expand:
+expand -t1 tabfilledfile
+expand -t1 tabfilledfile > spacefilledfile
+
+echo fidelity |tr '[:lower:]' '[:upper:]' (convert lower to upper case)
+
+paste command
+diff (difference)
+cmp (compare)
+comm (common)
+optimizer_adaptive_reporting_onlyoptimizer_adaptive_reporting_only
+cal ; date (run multiple commands at a time)
+cal ; date >f1
+(cal ; date) >f2
+
+find:
+find /etc/ -name passwd (filename as passwd)
+find -size 1024k (size with 1024k)
+find -size +1024k (greater than 1024k)
+find / -user student -group oracle 
+
+lpr : print to file
+pr -5 <filename> lpr
+
+tac :
+tac vtf
+tac tf
+rev tf
+
+ls -l |tree file1| sort | more
+
+tr:
+ls -ltr | tr -s " " (s squeeze, prints only with single space)
+echo naveen |tr -s "e" (prints as naven, squeezes to one e)
+echo naveen |tr -d "e" (deletes all e , prints navn)
+ls -l | tr -s " "|cut -f3,9 -d" " (displays only owner and filename)
+
+sort:
+sort <filename> (alphabetic sort)
+sort -r <filname> (reverse)
+sort -n <filename> (numerical sort)
+sort -nr <filename> ( numberic reverse)
+sort -k6 -t: /etc/passwd (k6 - 6th field, t -> searchlimiter)
+sort <filename> |uniq (remove duplicate lines)
+sort -u <filename>
+
+
+finger
+pinky
+script
+
+at:(schedules onetime)
+oracle@:default> date
+Wed Jan 18 23:05:40 EST 2017
+
+[/fpcmsbkup/PATCH]
+oracle@:default> at now +2min
+at> echo hello >/dev/pts/2
+at> <EOT>
+job 1 at 2017-01-18 23:07
+
+[/fpcmsbkup/PATCH]
+oracle@:default> atq
+1       2017-01-18 23:07 a oracle
+
+[/fpcmsbkup/PATCH]
+oracle@:default> hello
+
+at 09:37 Jan 18 2017
+
+different file types:
+ls -l /dev |grep ^c -> character special file
+ls -l /dev |grep ^b  -> block special device
+ls -l /dev |grep ^p  --> named pipe
+ls -l /dev |grep ^s  --> socket file
+
+oracle@lrtpfpcms147:adimu11> file /dev/sdy
+/dev/sdy: block special
+
+[/fisc/oracle]
+oracle@lrtpfpcms147:adimu11> file /dev/log
+/dev/log: socket
+
+permissions;
+symbolic:
+chmod u=x,g=w,o=x <filename> (replace permissions)
+chmod u+w,g+x,o+w <filename>  (add permissions)
+chmod a+r <filename> (for all)
+chmod u-x,g-wx,o-ws <filename>
+G
+
+octal permission:
+read - 4, write -2 ,x - 1
+chmod 765 <filename>
+
+change permission:
+chown student <filename> ( change only owner)
+chgrp prod <filename> (change group)
+chgrp root:prod <filename> (change both group and owner)
+
+
+zip:
+gzip -v <file/foldername> ( -v is for view the output (verbose))
+zcat (to view the gzip file)\bzip2
+bunzip2
+zip -v
+unzip
+tar (tape archive)
+tar cvf install.tar install.log
+tar tvf install.tar (to list backedup files)
+tar xvf install.log.tar(to untar)
+
+tar & gzip
+tar czvf install.tgz install.log
+tar tzvf install.tgz
+tar xzvf install.ltgz
+
+tar &  bzip
+tar cjvf
+tar tjvf
+tar xjvf
+
+c - create, z -zip, v - verbose, f- file, x - extract, j- bzip
+
+softlink & hardlink:
+ln -s file2 sf (softlink)
+ln file2 hf2 ( hardlink - even if we delete file2 , data still exists and can be accessed via hf2. For security purpose to avoid losing data)
+
+ulimit:
+ulimit -a
+ulimit -c 1024
+
+process:
+vi testfile& 
+jobs
+bg %2
+fg %2 (ctrl+z to suspend from vi session)
+ps -l
+nice -n -15 updatedb& (set priority for the process while startup)
+renice -19   (modify priority)
+
+ps -ef|more (for all users in the server)
+ps -ef|grep oracle 
+ps -u oracle (all oracle user in the server)
+ps -aux (extended info for all users)
+kill -9 (kill the process)
+kill -19 (stop process)
+kill -18 (continue process)
+kill -l (list all option)
+
+
+shell:
+oracle@:default> chsh -l  (list all shell available in the system)
+/bin/sh
+/bin/bash
+/sbin/nologin
+/bin/dash
+/bin/ksh
+/bin/tcsh
+/bin/csh
+/usr/bin/dzsh
+/usr/bin/tmux
+
+chsh (to change shell)
+
+oracle@:default> echo $BASH_VERSION
+4.1.2(1)-release
+
+ALIAS:
+alias c=clear d=date h=history l="ls -ltr"
+
+cat ~/.bashrc (edit alias)
+.bashrc
+alias d=date
+alias c=clear
+
+expression :
+oracle@:adimd11> a=10 b=20
+oracle@:adimd11> echo $a
+10
+oracle@:adimd11> expr $a + $b
+30
+oracle@:adimd11> echo $a+$b
+10+20
+oracle@:adimd11> echo $($a+$b)
+bash: 10+20: command not found
+oracle@:adimd11> echo $(($a+$b))
+30
+oracle@:adimd11> expr $(($a + $b))
+30
+
+performance monitor:
+iostat 5 2
+vmstat 5 2
+cat /proc/cpuinfo
+cat /proc/meminfo
+lscpu
+ps -aux
+
+top 5 CPu usage:
+ps -aux |tr -s " "| sort -k3rn -t" "| head -5
+
+shell scripting:
+[user10@vc2crtp2205798n praveen]$ cat script2
+#!/bin/bash
+echo -n "enter your name: "
+read name
+echo "$name, welcome to fidelity"
+
+[user10@vc2crtp2205798n praveen]$ sh script2
+enter your name: Praveen
+Praveen, welcome to fidelity
+
+Print reverse:
+[user10@vc2crtp2205798n praveen]$ cat script2
+#!/bin/bash
+echo -n "enter your name: "
+read name
+echo "$name, welcome to fidelity"
+echo " Reverse of your name is : `echo $name | rev`"
+
+Get two input:
+#!/bin/bash
+echo -n "Enter 2 numbers:"
+read a b
+echo sum=`expr $a + $b`
+echo product=`expr $a \* $b`
+
+arithmetic operation:
+[user10@vc2crtp2205798n praveen]$ cat ar
+#!/bin/bash
+echo -n "Enter 2 numbers:"
+read a b
+echo sum=`expr $a + $b`
+echo product=`expr $a \* $b`
+echo product=$(($a*$b))
+echo $product
+echo division=`expr $a \/ $b`
+echo quot=`expr $a % $b`
+
+integer:
+-eq, -ne,-lt,-le,-gt,-ge
+
+strings:
+= equal to
+!=not equal to
+
+[user10@vc2crtp2205798n praveen]$ c=hello d=hello
+[user10@vc2crtp2205798n praveen]$ [ $c = $d ] && echo  $c is equal to $d
+hello is equal to hello
+[user10@vc2crtp2205798n praveen]$ d=helo
+[user10@vc2crtp2205798n praveen]$ [ $c = $d ] && echo  $c is equal to $d
+
+
+ifelse:
+[user10@vc2crtp2205798n praveen]$ cat if1
+#!/bin/bash
+#Program to guess a no between 1 and 10
+echo -n "Enter a no between 1 and 10: "
+read n
+if [ $n -lt 6 ]
+then
+echo "Your guess is low"
+elif [ $n -eq 6 ]
+then
+echo Congrats! Your guess is right
+elif [ $n -gt 6 ] && [ $n -le 10 ]
+then
+echo Your guess is high
+else
+echo "Invalid entry"
+fi
+
+[user10@vc2crtp2205798n praveen]$ sh if1
+Enter a no between 1 and 10: 2
+Your guess is low
+[user10@vc2crtp2205798n praveen]$ sh if1
+Enter a no between 1 and 10: 7
+Your guess is high
+[user10@vc2crtp2205798n praveen]$ sh if1
+Enter a no between 1 and 10: 6
+Congrats! Your guess is right
+[user10@vc2crtp2205798n praveen]$ sh if1
+Enter a no between 1 and 10: 99
+Invalid entry
+
+check a value is number or not :
+[user10@vc2crtp2205798n praveen]$ cat numvalue
+#!/bin/bash
+echo -n "Enter a value: "
+read v
+expr $v + 1 &> /dev/null
+if [ `echo $?` -eq 0 ]
+then
+echo $v is anumber
+else
+echo $v is not a number
+fi
+
+output:
+[user10@vc2crtp2205798n praveen]$ sh numvalue
+Enter a value: 4
+4 is anumber
+[user10@vc2crtp2205798n praveen]$ sh numvalue
+Enter a value: 5t5
+5t5 is not a number
+
+Program Positioning:
+[user10@vc2crtp2205798n praveen]$ cat pp
+#!/bin/bash
+echo the program name is $0
+echo the first argument is $1
+echo the seconde argument is $2
+shift
+echo the third argument is $3
+echo all the arguments togher is $*
+echo total no of argument is $#
+
+
+output:
+[user10@vc2crtp2205798n praveen]$ sh pp Praveen Kumar Magesh
+the program name is pp
+the first argument is Praveen
+the seconde argument is Kumar
+the third argument is
+all the arguments togher is Kumar Magesh
+total no of argument is 2
+
+null value check:
+[user10@vc2crtp2205798n praveen]$ cat strtest
+#!/bin/bash
+echo -n "Enter a string: "
+read s
+if [ -z $s ]
+then
+echo "You have not made an entry"
+elif [ in $s ]
+then
+echo "String is not empty and you entered $s"
+fi
+
+output:
+[user10@vc2crtp2205798n praveen]$ sh strtest
+Enter a string:
+You have not made an entry
+
+Filecheck:
+[user10@vc2crtp2205798n praveen]$ cat filecheck
+#!/bin/bash
+if [ $# -ne 1 ]
+then
+echo "Usage: sh $0 arg1"
+else
+if [ -d $1 ]
+then
+echo "$1 is a directory"
+elif [ -h $1 ]
+then
+echo "$1 is a symbolic link"
+elif [ -s $1 ]
+then
+echo "$1 is a file that exists and its size is greater than zero"
+elif [ -f $1 ]
+then echo "$1 is an empty file"
+else
+echo "Invalid entry"
+fi
+fi
+
+output:
+[user10@vc2crtp2205798n praveen]$ sh filecheck a
+a is an empty file
+[user10@vc2crtp2205798n praveen]$ sh filecheck ar
+ar is a file that exists and its size is greater than zero
+[user10@vc2crtp2205798n praveen]$ sh filecheck zzzz
+Invalid entry
+[user10@vc2crtp2205798n praveen]$ sh filecheck aa aaa
+Usage: sh filecheck arg1
+
+maxfilesize in folder:
+ls -l | tr -s " "| sort -k5nr |head -1
+
+case :
+[user10@vc2crtp2205798n praveen]$ cat case
+echo "**************Calculator****************"
+echo "1.Addition"
+echo "2.Subtraction"
+echo "****************************************"
+echo -n "Enter 2 numbers a and b: "
+read a b
+echo "Enter your selection: "
+read s
+case $s in 1) echo sum=`expr $a + $b`;;
+           2) echo diff=`expr $a - $b`;;
+           *) echo "Invalid entry"
+esac
+
+output:
+**************Calculator****************
+1.Addition
+2.Subtraction
+****************************************
+Enter 2 numbers a and b: 500 400
+Enter your selection:
+2
+diff=100
+
+for :
+for i in {1..10..2}
+do
+echo $i
+done
+----
+
+for i in {1..10..3}
+do
+echo $i
+done
+
+output:
+[user10@vc2crtp2205798n praveen]$ sh for4
+1
+4
+7
+10
+
+---
+[user10@vc2crtp2205798n praveen]$ cat oddevenfor
+#!/bin/bash
+echo -e "Even \t odd"
+for i in {1..10}
+do
+if [`expr $i % 2` -eq 0]
+then
+echo -n even $i
+else
+echo -n odd $i
+fi
+done
+[user10@vc2crtp2205798n praveen]$ sh oddeven for
+Enter a number to check odd or even: 5
+5 is odd
+
+--
+sequence in for:
+[user10@vc2crtp2205798n praveen]$ cat for5
+echo -n "Enter number: "
+read n
+for i in $(seq 1 1 $n)
+do
+echo $i
+done
+
+[user10@vc2crtp2205798n praveen]$ sh for5
+Enter number: 3
+1
+2
+3
+
+[user10@vc2crtp2205798n praveen]$ cat for6
+for ((i=1;i<=10;i++))
+do
+echo $i
+done
+[user10@vc2crtp2205798n praveen]$ sh for6
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+
+Prime number check:
+[user10@vc2crtp2205798n praveen]$ cat primefor
+echo -n "Enter a number : "
+read n
+num=`expr $n / 2`
+for i in $(seq 2 1 $num)
+do
+if [`expr $n % $i` -eq 0 ]
+then
+echo $n is not a prime number
+exit
+fi
+done
+echo $n is a prime number
+[user10@vc2crtp2205798n praveen]$ sh primefor
+Enter a number : 5
+primefor: line 6: [1: command not found
+5 is a prime number
+
+Stringreverse:
+[user10@vc2crtp2205798n praveen]$ cat revstring
+echo -n "Enter a string: "
+read str
+len=`echo -n $str |wc -c`
+for i in $(seq $len -1 1)
+do
+echo -n `echo $str | cut -c$i`
+done
+echo
+
+Print pattern:
+[user10@vc2crtp2205798n praveen]$ cat pattern1
+for i in {1..5}
+do
+for j in $(seq 1 1 $i)
+do
+echo -n "*"
+done
+echo
+done
+[user10@vc2crtp2205798n praveen]$ sh pattern1
+*
+**
+***
+****
+*****
+
+Pattern2:
+for i in {1..5}
+do
+for j in {1..5}
+do
+echo -n "$i"
+done
+echo
+done
+[user10@vc2crtp2205798n praveen]$ sh pattern2
+11111
+22222
+33333
+44444
+55555
+
+Pattern3;
+for i in {5..1}
+do
+for j in $(seq $i -1 1)
+do
+echo -n "*"
+done
+echo
+done
+[user10@vc2crtp2205798n praveen]$ sh pattern3
+*****
+****
+***
+**
+*
+
+while:
+[user10@vc2crtp2205798n praveen]$ cat while1
+#program to find nos from 1 to 10 using while
+c=1
+while [ $c -le 10 ]
+do
+echo $c
+c=`expr $c + 1`
+done
+[user10@vc2crtp2205798n praveen]$ sh while1
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+
+oddeven:
+[user10@vc2crtp2205798n praveen]$ cat while2
+c=10
+while [ $c -gt 0 ]
+do
+if [ `expr $c % 2` -eq 0 ]
+then
+echo $c is even
+else
+echo $c is odd
+fi
+c=`expr $c - 1`
+done
+[user10@vc2crtp2205798n praveen]$ sh while2
+10 is even
+9 is odd
+8 is even
+7 is odd
+6 is even
+5 is odd
+4 is even
+3 is odd
+2 is even
+1 is odd
+
+until:
+[user10@vc2crtp2205798n praveen]$ cat until1
+c=1
+until [ $c -gt 10 ]
+do
+echo $c
+c=`expr $c + 1`
+done
+[user10@vc2crtp2205798n praveen]$ sh until1
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+
+
+
+function:
+[user10@vc2crtp2205798n praveen]$ cat fun1
+func()
+{
+echo hello world
+}
+func
+[user10@vc2crtp2205798n praveen]$ sh fun1
+hello world
+
+--
+[user10@vc2crtp2205798n praveen]$ cat fun2
+func()
+{
+echo add=`expr $1 + $2`
+}
+func $1 $2
+
+[user10@vc2crtp2205798n praveen]$ sh fun2 5 6
+add=11
+--
+
+call function from another file:
+
+[user10@vc2crtp2205798n praveen]$ cat scr1
+f2()
+{
+echo $a
+}
+f2
+[user10@vc2crtp2205798n praveen]$ cat scr2
+f1()
+{
+echo -n "Enter a value : "
+read a
+export a
+sh scr1
+}
+f1
+[user10@vc2crtp2205798n praveen]$ sh scr2
+Enter a value : PRaveen
+PRaveen
+---
+Debug:
+bash -x <scriptname>
+bash -v <scriptname>
+
+
+sed:
+sed 's/hi/hello/g' tf2 
+sed -e 's/hi/hello/g' -e 's/how/who/gi' tf2 (search and replace but doesnt modify source file)
+sed '1,3s/hari/sai/gi' names  (Replace 1 to 3rd line and repalce)
+sed -n '3p' names  (print 3rd line)
+sed -n '3,5p' names  (print 3 to 5th line)
+sed '3q' names (prints first 3 lines)
+sed -n '11,15p' /etc/passwd  
+
+[user10@vc2crtp2205798n ~]$ cat sed1
+Hi Hari
+[user10@vc2crtp2205798n ~]$ cat sedscript
+s/Hari/Giri/g
+[user10@vc2crtp2205798n ~]$ cat sed1
+Hi Hari
+[user10@vc2crtp2205798n ~]$ sed -i -f sedscript sed1
+[user10@vc2crtp2205798n ~]$ cat sed1
+Hi Giri
+
+
+Reference:
+Sams Teach Yourself Shell Programming in 24hours
+itconsultant550@gmail.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

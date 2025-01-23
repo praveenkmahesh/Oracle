@@ -1,0 +1,11 @@
+set lines 199 pages 199
+col segment_name for A30
+col table_name for A30
+col owner for A15
+select  sum(bytes)/1024/1024/1024 "GB" from dba_segments a,dba_lobs b where a.segment_name=b.segment_name and b.table_name='SETTLEMENT' ;
+
+
+select a.segment_name from dba_segments a,dba_lobs b
+where a.segment_name=b.segment_name  and a.owner='TRANSACTION_1' order by 2 desc;
+
+select sum(size_gb) from (select sum(bytes)/1024/1024/1024 size_gb from dba_segments where segment_name in (select index_name from dba_indexes where table_name='&tab' union select table_name from dba_tables where table_name='&tab' union select segment_name from dba_lobs where TABLE_NAME='&tab') group by segment_name);

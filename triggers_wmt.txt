@@ -1,0 +1,66 @@
+  CREATE OR REPLACE NONEDITIONABLE TRIGGER "SYS"."WMT_DB_HOUSEKEEPING_TRIG" AFTER STARTUP on database
+declare
+db_role varchar2(50);
+begin
+select database_role into db_role from v$database;
+if db_role = 'PRIMARY' then
+execute immediate 'ALTER SYSTEM SET db_block_checking = "FALSE" SCOPE=both ';
+execute immediate 'ALTER SYSTEM SET db_block_checksum = "OFF" SCOPE=both ';
+elsif (db_role = 'PHYSICAL STANDBY')  then
+execute immediate 'ALTER SYSTEM SET db_block_checksum = "TYPICAL" SCOPE=both ';
+execute immediate 'ALTER SYSTEM SET db_block_checking = "MEDIUM" SCOPE=both ';
+end if;
+end;
+/
+
+ALTER TRIGGER "SYS"."WMT_DB_HOUSEKEEPING_TRIG" ENABLE;
+
+CREATE OR REPLACE NONEDITIONABLE TRIGGER "SYS"."WMT_DB_BKUP_BCT_TRIG" AFTER DB_ROLE_CHANGE on database
+declare
+db_role varchar2(50);
+begin
+select database_role into db_role from v$database;
+if db_role = 'PRIMARY' then
+execute immediate 'ALTER DATABASE DISABLE BLOCK CHANGE TRACKING ';
+elsif (db_role = 'PHYSICAL STANDBY')  then
+execute immediate ' ALTER DATABASE ENABLE BLOCK CHANGE TRACKING ';
+end if;
+end;
+/
+
+ALTER TRIGGER "SYS"."WMT_DB_BKUP_BCT_TRIG" ENABLE;
+
+  CREATE OR REPLACE NONEDITIONABLE TRIGGER "SYS"."INSTANCE_CAGING_ON_ROLE_CHANGE" AFTER DB_ROLE_CHANGE on database
+declare
+db_role varchar2(16);
+begin
+select database_role into db_role from v$database;
+if db_role = 'PRIMARY' then
+execute immediate 'ALTER SYSTEM SET RESOURCE_MANAGER_PLAN = "DEFAULT_PLAN" SCOPE=both';
+execute immediate 'ALTER SYSTEM SET CPU_COUNT = 144 SCOPE=both';
+elsif (db_role = 'PHYSICAL STANDBY')  then
+execute immediate 'ALTER SYSTEM SET RESOURCE_MANAGER_PLAN = "DEFAULT_PLAN" SCOPE=both';
+execute immediate 'ALTER SYSTEM SET CPU_COUNT = 24 SCOPE=both';
+end if;
+end;
+/
+
+ALTER TRIGGER "SYS"."INSTANCE_CAGING_ON_ROLE_CHANGE" ENABLE;
+
+CREATE OR REPLACE NONEDITIONABLE TRIGGER "SYS"."INSTANCE_CAGING_ON_SHUTDOWN" BEFORE SHUTDOWN on database
+declare
+db_role varchar2(16);
+begin
+select database_role into db_role from v$database;
+if db_role = 'PRIMARY' then
+execute immediate 'ALTER SYSTEM SET RESOURCE_MANAGER_PLAN = "DEFAULT_PLAN" SCOPE=both';
+execute immediate 'ALTER SYSTEM SET CPU_COUNT = 144 SCOPE=both';
+elsif (db_role = 'PHYSICAL STANDBY') then
+execute immediate 'ALTER SYSTEM SET RESOURCE_MANAGER_PLAN = "DEFAULT_PLAN" SCOPE=both';
+execute immediate 'ALTER SYSTEM SET CPU_COUNT = 24 SCOPE=both';
+end if;
+end;
+/
+
+ALTER TRIGGER "SYS"."INSTANCE_CAGING_ON_SHUTDOWN" ENABLE;
+

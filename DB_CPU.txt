@@ -1,0 +1,1 @@
+select to_char(begin_time, 'HH24:MI') time, max(running_sessions_limit) cpu_count, sum(avg_running_sessions) avg_running_sessions, sum(avg_waiting_sessions) avg_waiting_sessions from v$rsrcmgrmetric_history group by begin_time order by begin_time; 

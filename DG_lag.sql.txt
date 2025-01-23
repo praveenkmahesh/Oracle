@@ -1,0 +1,39 @@
+select A.*,B.Applied "Last Standby Seq Applied" , A.Received - B.Applied "Gap" from
+(select thread#, max(sequence#) Received 
+from v$archived_log val, v$database vdb
+where val.resetlogs_change# = vdb.resetlogs_change#
+group by thread#) A,
+(select thread#, max(sequence#) Applied 
+from v$archived_log val, v$database vdb
+where val.resetlogs_change# = vdb.resetlogs_change#
+and val.applied='YES'
+group by thread# ) B
+where A.thread#=B.thread#
+order by 1;
+
+select inst_id,process,sequence#,thread#,status,blocks,block#,inst_id from Gv$managed_standby where process='MRP0';
+
+select al.thread#, max(al.sequence#) "Last Seq Recieved",
+(select max(lh.sequence#) from v$log_history lh where lh.thread# = al.thread#
+and lh.FIRST_TIME > (select max(RESETLOGS_TIME) from v$archived_log where thread# = al.thread# )) "Last Seq Applied",
+max(al.sequence#) - (select max(lh.sequence#) from v$log_history lh where lh.thread# = al.thread#
+and lh.FIRST_TIME > (select max(RESETLOGS_TIME) from v$archived_log where thread# = al.thread# )) "GAP"
+from v$archived_log al
+where al.FIRST_TIME > (select max(RESETLOGS_TIME) from v$archived_log where thread# = 4 )
+group by al.thread#
+/
+
+
+SELECT STATUS, GAP_STATUS FROM V$ARCHIVE_DEST_STATUS WHERE DEST_ID = 2;
+
+select dest_id,dest_name,status,error,inst_id from gv$archive_dest_status where error is not null;
+
+select inst_id,process,stATUS FROM  gv$managed_Standby;
+
+alter database recover managed standby database disconnect from session;
+
+
+set lines 199
+col dest_name for a30
+col destination for a50
+select DEST_NAME,STATUS,TYPE,RECOVERY_MODE,DESTINATION,DB_UNIQUE_NAME from gv$archive_dest_status;

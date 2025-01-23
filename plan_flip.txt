@@ -1,0 +1,25 @@
+select s.sid,s.sql_id,sq.plan_hash_value CURRENT_PHV,CHILD_NUMBER CHI,LAST_LOAD_TIME,EXECUTIONS EXECS,to_char(SQL_EXEC_START,'DD-MON-YYYY HH24:MI') SQL_EXEC_START ,round((sysdate-SQL_EXEC_START)*24*60,2) MINS_RUNG,
+round(BUFFER_GETS/decode(executions,0,1,executions),2) CURRENT_LIO,hist.plan_hash_value old_phv,hist.ELAPEXE MINS_RAN,hist.LIO_PEXE OLD_LIO,LAST_EXE_DATE from gv$session s,gv$sql sq,
+(select sql_id,module,plan_hash_value,to_char(min(BEGIN_INTERVAL_TIME),'DD-MON-YYYY HH24:MI') FIRST_EXE_DATE, to_char(max(END_INTERVAL_TIME),'DD-MON-YYYY HH24:MI') LAST_EXE_DATE,
+sum(EXECUTIONS_TOTAL) EXEC,round(sum(ROWS_PROCESSED_TOTAL)/sum(EXECUTIONS_TOTAL),0) ROWS_PROC,(round((sum(ELAPSED_TIME_TOTAL)/1000000/60)/sum(EXECUTIONS_TOTAL),2)) ELAPEXE,
+round(sum(BUFFER_GETS_TOTAL)/sum(EXECUTIONS_TOTAL),0) LIO_PEXE
+from DBA_HIST_SQLSTAT DHST,
+DBA_HIST_SNAPSHOT DHSNP
+where
+dhst.snap_id=dhsnp.snap_id and
+dhst.INSTANCE_NUMBER=dhsnp.INSTANCE_NUMBER and
+trunc(END_INTERVAL_TIME) < trunc(sysdate) and
+trunc(BEGIN_INTERVAL_TIME) > trunc(sysdate-70) and
+EXECUTIONS_TOTAL>0 group by sql_id,module,plan_hash_value order by 8) hist
+where s.sql_id=sq.sql_id
+and s.sql_id=hist.sql_id
+and s.inst_id=sq.inst_id
+and s.sql_address=sq.address
+and status='ACTIVE'
+AND s.username is not null
+and s.sql_id is not null
+and CHILD_NUMBER=0
+and sq.plan_hash_value!=hist.plan_hash_value
+and ((sysdate-SQL_EXEC_START)*24*60) > (hist.ELAPEXE+5)
+and username not in ('SYS','SYSTEM','DBSNMP')
+and ((sysdate-SQL_EXEC_START)*24*60)>10 order by 1,2,3,4,11

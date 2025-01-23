@@ -1,0 +1,45 @@
+CONNECT / AS SYSDBA
+SET PAGESIZE 9999
+SET LINESIZE 180
+COL 'Total Large Pool Usage' FORMAT 99999999999999999999999
+COL 'Total UGA' FORMAT 99999999999999999999999
+COL bytes FORMAT 999999999999999
+COL name FORMAT A40
+COL value FORMAT A20
+ALTER SESSION SET nls_date_format='DD-MON-YYYY HH24:MI:SS';
+SET TRIMOUT ON
+SET TRIMSPOOL ONa
+
+SPOOL largepool.txt
+
+/* Database Identification */
+SELECT name, platform_id, database_role FROM v$database;
+SELECT * FROM v$version WHERE banner LIKE 'Oracle Database%';
+
+/* Current instance parameter values */
+SELECT n.ksppinm name, v.KSPPSTVL value
+FROM x$ksppi n, x$ksppsv v
+WHERE n.indx = v.indx and (n.ksppinm like '%large_pool%' or n.ksppinm like 'parallel%' or n.ksppinm = '_kghdsidx_count')
+ORDER BY 1;
+
+/* Current memory settings */
+SELECT component, current_size FROM v$sga_dynamic_components;
+
+/* Memory resizing operations */
+SELECT start_time, end_time, component, oper_type, oper_mode, initial_size, target_size, final_size, status
+FROM v$sga_resize_ops
+ORDER BY 1, 2;
+
+/* Historical memory resizing operations */
+SELECT start_time, end_time, component, oper_type, oper_mode, initial_size, target_size, final_size, status
+FROM dba_hist_memory_resize_ops
+ORDER BY 1, 2;
+
+/* Large Pool memory usage */
+SELECT SUM(bytes) "Total Large Pool Usage" FROM v$sgastat WHERE pool = 'large pool' AND name != 'free memory';
+SELECT name, bytes FROM v$sgastat WHERE pool = 'large pool' ORDER BY bytes DESC;
+
+/* Total UGA from session statistics */
+SELECT SUM(value) "Total UGA" FROM v$sesstat s, v$statname n WHERE n.statistic# = s.statistic# AND name = 'session uga memory';
+
+SPOOL OFF

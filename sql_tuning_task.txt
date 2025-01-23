@@ -1,0 +1,57 @@
+DECLARE
+  l_sql_tune_task_id  VARCHAR2(100);
+BEGIN
+  l_sql_tune_task_id := DBMS_SQLTUNE.create_tuning_task (
+                          sql_id      => 'bf9kdnvuunzfa',
+                          scope       => DBMS_SQLTUNE.scope_comprehensive,
+                          time_limit  => 1800,
+                          task_name   => 'bf9kdnvuunzfa_tuning_task1',
+                          description => 'Tuning task for statement bf9kdnvuunzfa');
+  DBMS_OUTPUT.put_line('l_sql_tune_task_id: ' || l_sql_tune_task_id);
+END;
+/
+
+EXEC DBMS_SQLTUNE.execute_tuning_task(task_name => 'bf9kdnvuunzfa_tuning_task');
+
+
+SET LONG 10000;
+SET PAGESIZE 1000
+SET LINESIZE 200
+SELECT DBMS_SQLTUNE.report_tuning_task('bf9kdnvuunzfa_tuning_task') AS recommendations FROM dual;
+
+DECLARE
+  l_sql_tune_task_id  VARCHAR2(100);
+
+BEGIN
+  l_sql_tune_task_id := DBMS_SQLTUNE.create_tuning_task (
+                          sql_id      => 'b27vs46hs469u',
+                          scope       => DBMS_SQLTUNE.scope_comprehensive,
+                          time_limit  => 1800,
+                          task_name   => 'b27vs46hs469u_tuning4_task',
+                          description => 'Tuning task for statement b27vs46hs469u');
+  DBMS_OUTPUT.put_line('l_sql_tune_task_id: ' || l_sql_tune_task_id);
+END;
+/_tuning4_task') AS recommendations FROM dual;
+
+    execute dbms_sqltune.create_sql_plan_baseline(task_name =>'5vdz2k2b9sc5h_tuning_task_', owner_name => 'SYS', plan_hash_value => 3158363528);
+
+RECOMMENDATIONS
+--------------------------------------------------------------------------------
+
+  id plan hash	last seen	     elapsed (s)  origin	  note
+
+  -- ---------- -------------------- ------------ --------------- --------------
+--
+   1  501063503  2023-09-16/06:06:12	    0.051 Cursor Cache	  original plan
+
+   2 3158363528  2023-09-16/05:45:07	    0.320 AWR
+
+
+
+-------------------------------------------------------------------------------
+Schema Name   : APP1_STG_CORE
+Container Name: MXAATGPDBP1
+SQL ID	      : aubrbbqw1p8xt
+SQL Text      : SELECT t1.config_repo_id,t1.item_desc_name,t1.repository_id,t1
+		.generation
+		   FROM srch_update_queue t1, srch_config_repo t2

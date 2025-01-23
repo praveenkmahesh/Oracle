@@ -1,0 +1,80 @@
+SELECT sql_id,plan_hash_value,
+SUM(elapsed_time_total)/SUM(executions_total)/1000000 avg_elapsedt_secs
+FROM dba_hist_sqlstat 
+WHERE sql_id = 'dv3cqxf5k7vm0'
+GROUP BY sql_id,plan_hash_value;
+
+SELECT a.sql_id,a.plan_hash_value,trunc(b.begin_interval_time) run_date,
+(case when SUM(a.executions_delta)>0 then round((SUM(a.elapsed_time_delta)/SUM(a.executions_delta)/1000000)/60,2) else round((SUM(a.elapsed_time_delta)/10e5)/60,2) end)time_taken_mins,
+--SUM(a.executions_delta),
+sum(a.cpu_time_delta)/10e5/60 cpu_time_mins,
+sum(a.executions_delta) executions,sum(a.buffer_gets_delta) logical_reads,
+sum(disk_reads_delta) physical_reads,sum(rows_processed_delta)
+FROM dba_hist_sqlstat a,dba_hist_snapshot b where
+a.snap_id=b.snap_id and a.dbid=b.dbid 
+and trunc(begin_interval_time) between to_date('10/07/2022','dd/mm/yyyy') and to_date('30/07/2022','dd/mm/yyyy')
+and a.instance_number=b.instance_number 
+and a.sql_id = 'dv3cqxf5k7vm0'
+GROUP BY a.sql_id,
+a.plan_hash_value,
+trunc(b.begin_interval_time) order by 3 desc ;	
+
+
+SELECT a.sql_id,a.plan_hash_value,trunc(b.begin_interval_time) run_date,
+round((SUM(a.elapsed_time_delta)/SUM(a.executions_delta)/1000000)/60,2) avg_elapsed_time_mins,sum(a.buffer_gets_delta)
+FROM dba_hist_sqlstat a,dba_hist_snapshot b where
+a.snap_id=b.snap_id and a.dbid=b.dbid 
+and trunc(begin_interval_time) between to_date('01/05/2024','dd/mm/yyyy') and to_date('05/05/2024','dd/mm/yyyy')
+and a.instance_number=b.instance_number 
+and a.sql_id = 'chc8jj6v285fz'
+GROUP BY a.sql_id,a.plan_hash_value,trunc(b.begin_interval_time) order by 3 desc;	
+
+select
+  sql_id,
+  plan_hash_value,
+  s.instance_number inst,
+  s.snap_id,
+  to_char(s.begin_interval_time,'YYYYMMDD:HH24:MI') snap_time,
+  executions_delta delta_executed,
+  (case when executions_delta>0 then (rows_processed_delta/executions_delta) else 0 end) rows_executed,
+  (case when executions_delta>0 then ((elapsed_time_delta/1000000)/executions_delta) else 0 end) ela_executed,
+  (case when executions_delta>0 then (buffer_gets_delta/executions_delta) else 0 end) logical_reads_executed,
+  (case when executions_delta>0 then (disk_reads_delta/executions_delta) else 0 end) physcial_reads_executed,  
+  (case when executions_delta>0 then ((iowait_delta/1000000)/executions_delta) else 0 end) io_secs_executed,
+  (case when executions_delta>0 then ((cpu_time_delta/1000000)/executions_delta) else 0 end) cpu_executed,
+PX_SERVERS_EXECS_TOTAL
+from
+  dba_hist_sqlstat b,
+  dba_hist_snapshot s
+where
+  b.sql_id = 'chc8jj6v285fz'
+  and b.snap_id = s.snap_id
+  and s.begin_interval_time >=sysdate -5
+  and s.instance_number = b.instance_number
+order by
+  4 desc;	
+
+select
+  sql_id,
+  plan_hash_value,
+  s.instance_number inst,
+  s.snap_id,
+  to_char(s.begin_interval_time,'YYYYMMDD:HH24:MI') snap_time,
+  executions_delta delta_executed,
+  (case when executions_delta>0 then (rows_processed_delta/executions_delta) else rows_processed_delta end) rows_executed,
+  (case when executions_delta>0 then ((elapsed_time_delta/1000000)/executions_delta) else elapsed_time_delta/10e5 end) ela_executed,
+  (case when executions_delta>0 then (buffer_gets_delta/executions_delta) else buffer_gets_delta end) logical_reads_executed,
+  (case when executions_delta>0 then (disk_reads_delta/executions_delta) else disk_reads_delta end) physcial_reads_executed,  
+  (case when executions_delta>0 then ((iowait_delta/1000000)/executions_delta) else iowait_delta/10e5 end) io_secs_executed,
+  (case when executions_delta>0 then ((cpu_time_delta/1000000)/executions_delta) else cpu_time_delta/10e5 end) cpu_executed
+from
+  dba_hist_sqlstat b,
+  dba_hist_snapshot s
+where
+  b.sql_id = 'fkbwja9mr6k6n'
+  and b.snap_id = s.snap_id
+  and s.begin_interval_time <=sysdate 
+  and s.instance_number = b.instance_number
+  and parsing_schema_name='ADIMFACODSUAT01'
+order by
+  4 desc;	adimu1	1487667216164	SQL	3	0.235

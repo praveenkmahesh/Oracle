@@ -1,0 +1,76 @@
+set feedback off
+ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD HH24:MI:SS';
+set lines 300
+set linesize 360
+col sysdate for 99999999999
+col sysdate for a8
+col inst_id for 99
+col inst_id for a3
+col sid for 99
+col sid for a3
+col client_info for a45
+col status for a10
+col sql_hash_value for a8
+col sql_hash_value for 99999999999
+col prev_hash_value for a8
+col prev_hash_value for 9999999999
+col locker for a15
+col waiter for a20
+col object_name for a15
+col machine for a20
+SELECT sysdate,lh.inst_id l_ins, lh.SID lock_sid, lx.client_info||lx.module Locker,
+       lx.status Locker_Status,lx.machine Machine, lx.SQL_HASH_VALUE,lx.PREV_HASH_VALUE, ls.client_info||ls.module Waiter,
+       ls.status Waiter_Status,do.object_name, lw.inst_id w_ins,
+       lw.SID wait_sid,
+               DECODE (lh.TYPE,
+                       'MR', 'Media_recovery',
+                       'RT', 'Redo_thread',
+                       'UN', 'User_name',
+                       'TX', 'Transaction',
+                       'TM', 'Dml',
+                       'UL', 'PLSQL User_lock',
+                       'DX', 'Distrted_Transaxion',
+                       'CF', 'Control_file',
+                       'IS', 'Instance_state',
+                       'FS', 'File_set',
+                       'IR', 'Instance_recovery',
+                       'ST', 'Diskspace Transaction',
+                       'IV', 'Libcache_invalidation',
+                       'LS', 'LogStaartORswitch',
+                       'RW', 'Row_wait',
+                       'SQ', 'Sequence_no',
+                       'TE', 'Extend_table',
+                       'TT', 'Temp_table',
+                      'Nothing-'
+                      ) waiter_lock_type,
+               DECODE (lw.request,
+                       0, 'None',
+                       1, 'NoLock',
+                       2, 'Row-Share',
+                       3, 'Row-Exclusive',
+                       4, 'Share-Table',
+                       5, 'Share-Row-Exclusive',
+                       6, 'Exclusive',
+                       'Nothing-'
+                      ) wait_mode_req
+          FROM gv$lock lw, gv$lock lh, gv$session ls, gv$session lx, gv$locked_object lo, sys.dba_objects do
+          WHERE lh.id1 = lw.id1
+          AND lh.id2 = lw.id2
+          AND lh.request = 0
+          AND lw.lmode = 0
+          AND lw.inst_id=ls.inst_id
+          AND lx.inst_id=lh.inst_id
+          AND lw.sid = ls.sid
+          AND lx.sid = lh.sid
+          AND lx.inst_id = lo.inst_id
+          AND lx.sid = lo.session_id
+          AND lx.last_call_et>300
+          AND lo.object_id = do.object_id
+          AND (lh.id1, lh.id2) IN (SELECT id1, id2
+                                     FROM gv$lock
+                                    WHERE request = 0
+                                    INTERSECT a
+                                    SELECT id1, id2
+                                      FROM gv$lock
+                                     WHERE lmode = 0)
+                                    order by lh.inst_id, lh.sid;

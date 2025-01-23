@@ -1,0 +1,36 @@
+! rm kill.sql
+Spool kill.sql
+select 'alter system kill session ''' || sid || ',' || serial# || ',@' ||inst_id|| ''' immediate ;' from gv$session where status='INACTIVE' and inst_id=1 and service_name like 'ussiamp1_ussiampdbp1_iamnew' ;
+Spool off
+@kill.sql
+
+! rm kill.sql
+Spool kill.sql
+select 'alter system kill session ''' || sid || ',' || serial# || ',@' ||inst_id|| ''' immediate ;' from gv$session where sql_id='6wyuq6vuv3umx' ;
+Spool off
+@kill.sql
+
+
+! rm kill.sql
+Spool kill.sql
+select 'alter system kill session ''' || sid || ',' || serial# || ',@' ||inst_id|| ''' immediate ;' from gv$session where  inst_id in (2)   and machine like 'Pangaea-Payments-Summary-prod-wmt-%';
+Spool off
+@kill.sql
+
+
+
+Spool kill.sql
+select 'alter system kill session ''' || sid || ',' || serial# || ',@' ||inst_id|| ''' immediate ;' from gv$session where module like 'SQL De%' and username='SYS';
+Spool off
+@kill.sql
+
+
+select count(*),machine,module from gv$session where sql_id ='1dsbkjhrquc6d' group by machine,module;
+
+and status='INACTIVE' and inst_id=1;
+Spool off
+@kill.sql
+
+select INST_ID,SQL_ID,POSITION,NAME,VALUE_STRING from GV$SQL_BIND_CAPTURE where sql_id='ccfrfn4vuhtt0' order by POSITION;
+
+select 'alter system kill session ''' || sid || ',' || serial# || ',@' ||inst_id|| ''' immediate ;' from gv$session where status='ACTIVE' and username is not null and sql_id='ccfrfn4vuhtt0' and last_call_et>3600;

@@ -1,0 +1,62 @@
+
+nohup rman target sys/DbOraWalmtadm21q4@cdcukpodsp11c auxiliary sys/DbOraWalmtadm21q4@edcxukpodsp1 msglog /u01/app/oracle/duplicate1.log cmdfile=/u01/app/oracle/dup.rcv &
+
+
+nohup rman target 
+
+ 
+run
+{
+allocate channel pri1 type disk;
+allocate channel pri2 type disk;
+allocate channel pri3 type disk;
+allocate channel pri4 type disk;
+allocate channel pri5 type disk;
+allocate channel pri6 type disk;
+allocate channel pri7 type disk;
+allocate channel pri8 type disk;
+backup as copy database format '+DATA01';
+}
+
+run
+{
+allocate channel pri1 type disk;
+allocate channel pri2 type disk;
+allocate channel pri3 type disk;
+allocate channel pri4 type disk;
+allocate channel pri5 type disk;
+allocate channel pri6 type disk;
+allocate channel pri7 type disk;
+allocate channel pri8 type disk;
+allocate auxiliary channel stby1 type disk;
+allocate auxiliary channel stby2 type disk;
+allocate auxiliary channel stby3 type disk;
+allocate auxiliary channel stby4 type disk;
+allocate auxiliary channel stby5 type disk;
+allocate auxiliary channel stby6 type disk;
+allocate auxiliary channel stby7 type disk;
+allocate auxiliary channel stby8 type disk;
+DUPLICATE TARGET DATABASE
+  FOR STANDBY
+  FROM ACTIVE DATABASE
+  SPFILE
+    SET db_unique_name='edcxukpodsp1'
+    SET FAL_SERVER='cdcukpodsp1_dg,edcukpodsp1_dg'
+    SET FAL_CLIENT='edcxukpodsp1_dg'
+    SET remote_listener='edc-ep13-scan.prod.walmart.com:61290'
+  NOFILENAMECHECK;
+}
+
+
+run
+{
+allocate channel stby1 type disk;
+allocate channel stby2 type disk;
+allocate channel stby3 type disk;
+allocate channel stby4 type disk;
+allocate channel stby5 type disk;
+allocate channel stby6 type disk;
+allocate channel stby7 type disk;
+allocate channel stby8 type disk;
+recover database from service cdcxghcsprp1_dg noredo using compressed backupset;
+}		

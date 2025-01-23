@@ -1,0 +1,186 @@
+1)  Lun size check for ASM Disk size.. 
+     ------------------------------------------------
+select d.group_number, g.name, d.os_mb/1024 GB
+from v$asm_disk d left outer join v$asm_diskgroup g
+on (d.group_number = g.group_number)
+order by g.group_number, d.os_mb;
+
+
+2) Asm Disk Group Size..
+
+set linesize 1000
+break on report on disk_group_name skip 1
+compute sum label "Grand Total: " of total_MB used_MB on report
+SELECT
+  name                                GROUP_NAME
+, round ( total_mb)                   TOTAL_MB
+, round ( (total_mb - free_mb) )      USED_MB
+, round ( free_mb)                    FREE_MB
+, ROUND((1- (free_mb / total_mb))*100,2  )  USED
+, (100 - ROUND((1- (free_mb / total_mb))*100,2))  FREE
+FROM
+  v$asm_diskgroup
+ORDER BY
+  name
+/ 
+
+select name,total_mb/1024 total_gb,free_mb/1024 free_gb, round(free_mb/total_mb*100) "FREE%" from v$asm_diskgroup where name ='BOQR_DG';
+
+alter tablespace  AUDIT_DATA add datafile '+BOQR_DG' size 2048M autoextend on Maxsize 30G;
+
+
+3) Flash recovery size..
+   --------------------
+col name for a32
+col size_m for 999,999,999
+col reclaimable_m for 999,999,999
+col used_m for 999,999,999
+col pct_used for 999
+
+SELECT name
+, ceil( space_limit / 1024 / 1024) SIZE_M
+, ceil( space_used  / 1024 / 1024) USED_M
+, ceil( space_reclaimable  / 1024 / 1024) RECLAIMABLE_M
+, decode( nvl( space_used, 0),
+0, 0
+, ceil ( ( ( space_used - space_reclaimable ) / space_limit) * 100) ) PCT_USED
+FROM v$recovery_file_dest
+ORDER BY name
+/
+
+
+
+4) Asm Disk Group Size..
+   -------------------
+
+SET LINESIZE  145
+SET PAGESIZE  9999
+SET VERIFY    off
+COLUMN group_name             FORMAT a20           HEAD 'Disk Group|Name'
+COLUMN sector_size            FORMAT 99,999        HEAD 'Sector|Size'
+COLUMN block_size             FORMAT 99,999        HEAD 'Block|Size'
+COLUMN allocation_unit_size   FORMAT 999,999,999   HEAD 'Allocation|Unit Size'
+COLUMN state                  FORMAT a11           HEAD 'State'
+COLUMN type                   FORMAT a6            HEAD 'Type'
+COLUMN total_mb               FORMAT 999,999,999   HEAD 'Total Size (MB)'
+COLUMN used_mb                FORMAT 999,999,999   HEAD 'Used Size (MB)'
+COLUMN pct_used               FORMAT 999.99        HEAD 'Pct. Used'
+
+break on report on disk_group_name skip 1
+compute sum label "Grand Total: " of total_mb used_mb on report
+
+SELECT
+    name                                     group_name
+  , sector_size                              sector_size
+  , block_size                               block_size
+  , allocation_unit_size                     allocation_unit_size
+  , state                                    state
+  , type                                     type
+  , total_mb                                 total_mb
+  , (total_mb - free_mb)                     used_mb
+  , ROUND((1- (free_mb / total_mb))*100, 2)  pct_used
+FROM
+    v$asm_diskgroup
+ORDER BY
+    name
+/
+
+
+5)Oracle Database : Space used in the flash recovery area.
+
+ select * from V$FLASH_RECOVERY_AREA_USAGE;
+
+
+
+set lines 900 pages 900
+col NAME for a15
+col space_limit for a15
+col SPACE_USED for a15
+
+
+select name,space_limit/1024/1024,SPACE_USED/1024/1024 from v$recovery_file_dest;
+
+
+select NAME,
+floor(space_limit/1024/1024) "Size_MB",
+ceil(space_used/1024/1024) "Used_MB",
+floor(space_limit/1024/1024) - ceil(space_used/1024/1024) "Available_MB",
+round(ceil(space_used/1024/1024) / floor(space_limit/1024/1024) * 100)  || '%' "Percent Used"
+from v$recovery_file_dest
+order by 1;
+
+*****
+select * from V$RECOVERY_AREA_USAGE;
+****
+
+
+4) Monitor Rebalance operation:
+select INST_ID, OPERATION, STATE, POWER, SOFAR, EST_WORK, EST_RATE, EST_MINUTES from GV$ASM_OPERATION;
+
+/*  Disk names for drop*/
+select group_number, disk_number, name, total_mb, free_mb, path, header_status
+from v$asm_disk;
+
+
+----Please use the below scripts to quickly identify the space consumed by each db hosted in a particular db:
+ 
+set lines 180 pages 1000
+col DBNAME for a20
+col "FILE_TYPE" for a20
+ 
+SELECT
+gname,
+dbname,
+file_type,
+round(SUM(space)/1024/1024) mb,
+round(SUM(space)/1024/1024/1024) gb,
+COUNT(*) "#FILES"
+FROM
+(   SELECT
+gname,
+regexp_substr(full_alias_path, '[[:alnum:]_]*',1,4) dbname,
+file_type,
+space
+FROM
+(   SELECT
+concat('+'||gname, sys_connect_by_path(aname, '/')) full_alias_path,
+system_created,
+file_type,
+                      space,
+                      gname
+                  FROM
+                      (   SELECT
+                              b.name            gname,
+                              a.parent_index    pindex,
+                              a.name            aname,
+                              a.reference_index rindex ,
+                              a.system_created,
+                              c.type file_type,
+                              c.space
+                          FROM
+                              v$asm_alias a,
+                              v$asm_diskgroup b,
+                              v$asm_file c
+                          WHERE
+                              a.group_number = b.group_number
+                          AND a.group_number = c.group_number(+)
+                          AND a.file_number = c.file_number(+)
+                          AND a.file_incarnation = c.incarnation(+) )
+                  START WITH (mod(pindex, power(2, 24))) = 0
+                  AND rindex IN
+                      (   SELECT a.reference_index
+                          FROM   v$asm_alias a,
+                                 v$asm_diskgroup b
+                          WHERE  a.group_number = b.group_number
+                          AND    mod(a.parent_index, power(2, 24)) = 0
+                      ) CONNECT BY prior rindex = pindex )
+          WHERE NOT file_type IS NULL
+          and   system_created = 'Y' )
+  GROUP BY
+      gname,
+      dbname,
+      file_type
+  ORDER BY
+      gname,
+      file_type
+  /

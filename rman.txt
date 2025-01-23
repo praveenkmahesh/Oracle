@@ -1,0 +1,20 @@
+LIST BACKUP OF DATABASE COMPLETED after '(SYSDATE-10)';
+
+delete BACKUP OF DATABASE COMPLETED before '(SYSDATE-10)';
+
+
+run {
+  
+  BACKUP
+  FORMAT '+RECOC1/TRAXEQ/BACKUPSET/%d_D_%T_%u_s%s_p%p'
+  incremental level 0 DATABASE
+  CURRENT CONTROLFILE
+  FORMAT '+RECOC1/TRAXEQ/BACKUPSET/%d_C_%T_%u'
+  SPFILE
+  FORMAT '+RECOC1/TRAXEQ/BACKUPSET/%d_S_%T_%u'
+  PLUS ARCHIVELOG
+  FORMAT '+RECOC1/TRAXEQ/BACKUPSET/%d_A_%T_%u_s%s_p%p';
+  
+}
+
+delete archivelog all backed up 1 times to DISK;

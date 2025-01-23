@@ -1,0 +1,24 @@
+select 
+   to_char(begin_time,'MM/DD HH24:MI') begin_time,
+   undoblks,
+   maxquerylen,
+   unxpstealcnt,
+   expstealcnt,
+   nospaceerrcnt,
+   ssolderrcnt,
+   tuned_undoretention
+from 
+   v$undostat where maxqueryid='&sqlid';
+
+Here are the salient columns of v$undostat and their meanings:
+
+undoblks:  This is the number of undo blocks in the undo tablespace.
+maxquerylen:  This column of v$undostat displays the maximum query length (in seconds) of the largest query during the specified time period.  This is used as feedback for setting the undo_retention parameter because undo_retention should be larger than the value returned by the maxquerylen column.  In sum, the undo_retention initialization parameter should be set to a value larger than the maximum query length.
+ 
+expstealcnt:  This v$undostat column shows how many times expired undo blocks were stolen for that time interval.
+
+unxpstealcnt:  This v$undostat column shows how many times unexpired undo blocks were stolen. 
+nospaceerrcnt: This v$undostat column shows how many times there was no free space in the undo tablespace. 
+ssolderrcnt: This v$undostat column shows how many times queries received the ORA-1555 error message during that time interval. If this column contains non-zero values, consider raising the undo_retention initialization parameter.
+Note:  If the expstealcnt, unxpstealcnt or the nospaceerrcnt columns contain non-zero values, your undo tablespace may be sized too small and you should consider increasing the size of your undo tablespace.
+

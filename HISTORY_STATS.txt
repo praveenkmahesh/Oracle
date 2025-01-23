@@ -1,0 +1,47 @@
+When new statistics are gathered the old statistics are stored in the followings tables and retained for 31 days by default.
+
+WRI$_OPTSTAT_TAB_HISTORY
+WRI$_OPTSTAT_IND_HISTORY
+WRI$_OPTSTAT_HISTHEAD_HISTORY
+WRI$_OPTSTAT_HISTGRM_HISTORY
+WRI$_OPTSTAT_OPR
+WRI$_OPTSTAT_AUX_HISTORY
+dba_TAB_STATS_HISTORY
+
+select * from table(dbms_stats.diff_table_stats_in_history(
+                    ownname => 'ADIMFACODSUAT01',
+                    tabname => upper('TRD_TXN'),
+                    time1 => to_timestamp('2016-08-15:09:00:00','yyyy-mm-dd:hh24:mi:ss'),
+                    time2 => to_timestamp('2016-08-12:09:00:00','yyyy-mm-dd:hh24:mi:ss'),
+                    pctthreshold => 0));   
+
+ 
+
+You can join dba_objects.object_id to WRI$_OPTSTAT_TAB_HISTORY.obj# to view older statistics up to the end of your retention period.
+
+For example :-
+
+set pages 100000;
+select distinct(o.owner), o.object_name, o.object_id, o.object_type, o.subobject_name,
+CASE
+   WHEN o.object_type = 'INDEX PARTITION' THEN to_char(si.savtime)
+   WHEN o.object_type = 'TABLE PARTITION' THEN to_char(st.savtime)
+   WHEN o.object_type = 'INDEX' THEN to_char(si.savtime)
+   WHEN o.object_type = 'TABLE' THEN to_char(st.savtime)
+   ELSE 'NOTHING'
+END AS "nsavtime"
+from dba_objects o, sys.WRI$_OPTSTAT_IND_HISTORY si, sys.WRI$_OPTSTAT_TAB_HISTORY st
+where (o.owner, o.object_name) in (
+select owner, index_name as object_name from dba_indexes
+     where table_owner=('&&OWNER')
+     and table_name in ('&&TABLE_NAME')
+    union
+     select owner, table_name as object_name from dba_tables
+     where owner=('&OWNER')
+     and table_name in ('&TABLE_NAME'))
+and (o.object_id=si.obj#
+or o.object_id=st.obj#)
+--and si.savtime between  to_date('06-JAN-2014:10:30:00','DD-MON-YYYY:HH24:MI:SS')  and to_date('06-JAN-2014:16:10:00','DD-MON-YYYY:HH24:MI:SS')
+--and st.savtime between to_date('06-JAN-2014:10:30:00','DD-MON-YYYY:HH24:MI:SS')  and to_date('06-JAN-2014:16:10:00','DD-MON-YYYY:HH24:MI:SS')
+order by 6,4,2
+/ 

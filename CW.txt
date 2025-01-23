@@ -1,0 +1,67 @@
+break on inst_id
+set pages 200 lines 200
+col service_name form a30
+set lines 200
+set pages 50
+set feedback off
+col machine for a40
+col event format a50
+break on useraname skip 1
+compute sum of count(1) on username
+
+
+set lines 132 pages 1000
+
+show parameter db_name
+show parameter db_uniq
+show parameter instance_name
+
+select  inst_id,
+        service_name,
+        count(1) count
+from    gv$session
+where   schemaname not in ('SYS', 'DBSNMP')
+and     service_name not in ('SYS$USERS')
+group by inst_id,
+        service_name
+        order by inst_id,
+        service_name;
+select to_char(sysdate,'DD-MON-YYYY HH24:MI:SS'),inst_id,count(status) Total,
+   sum(decode(status,'ACTIVE',1,0)) ACTIVE ,sum(decode(status,'ACTIVE',0,1)) INACTIVE
+   from gv$session  where type='USER' group by inst_id
+   order by inst_id asc;
+set lines 500 pages 500
+col event format a50
+
+col wait_class for a30
+select to_char(sysdate,'DD-MON-YYYY HH24:MI:SS'),inst_id, event,wait_class, count(*)
+  from gv$session_wait
+  where wait_class not in ('Idle') and event not in (
+'HS message to agent',
+'SQL*Net break/reset to client',
+'SQL*Net message from client',
+'SQL*Net message to client',
+'jobq slave wait',
+'pipe get',
+'pmon timer',
+'queue messages',
+'rdbms ipc message',
+'smon timer',
+'wait for unread message on broadcast channel',
+'wakeup time manager',
+'ASM background timer',
+'DIAG idle wait',
+'PX Deq: Execute Reply',
+'PX Deq: Execution Msg',
+'PX Deq: reap credit',
+'Streams AQ: qmn coordinator idle wait',
+'Streams AQ: qmn slave idle wait',
+'Streams AQ: waiting for messages in the queue',
+'Streams AQ: waiting for time management or cleanup tasks',
+'class slave wait',
+'gcs remote message',
+'ges remote message'
+)
+group by inst_id, event,wait_class
+order by 2,1
+/

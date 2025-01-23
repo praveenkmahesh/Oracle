@@ -1,0 +1,15 @@
+Disable Disk Scrubbing 
+ 
+dcli -g /root/cell_group -l root 'cellcli -e list cell attributes hardDiskScrubInterval'
+dcli -g /root/cell_group -l root 'cellcli -e alter cell hardDiskScrubInterval=none'
+dcli -g /root/cell_group -l root 'cellcli -e list cell attributes hardDiskScrubInterval'
+ 
+Enable Disk Scrubbing:
+Re - enable disk scrubbing if it was disabled earlier:
+dcli -g /root/cell_group -l root 'cellcli -e list cell attributes hardDiskScrubInterval'
+dcli -g /root/cell_group -l root "cellcli -e alter cell hardDiskScrubInterval=\'\'"
+dcli -g /root/cell_group -l root 'cellcli -e list cell attributes hardDiskScrubInterval'
+Find the planned start time & format (hardDiskScrubStartTime)
+dcli -g /root/cell_group -l root 'cellcli -e list cell attributes name,hardDiskScrubInterval,hardDiskScrubStartTime'
+Change hard disk scrub start time
+dcli -g /root/cell_group -l root "cellcli -e \"alter cell hardDiskScrubStartTime='2019-10-18T02:30:00+00:00'\""

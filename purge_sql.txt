@@ -1,0 +1,10 @@
+SQL> select ADDRESS, HASH_VALUE from V$SQLAREA where SQL_ID like '3uu9nxrjz8tk8';
+
+ADDRESS 	 HASH_VALUE
+---------------- ----------
+000000085FD77CF0  808321886
+	
+SQL> exec DBMS_SHARED_POOL.PURGE ('07000AEC35FAA6F0, 3824445000', 'C');
+
+PL/SQL procedure successfully completed.
+''00o6hhjhl\o]'.]=====,...........l/.....≥/

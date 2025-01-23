@@ -1,0 +1,39 @@
+I
+And sql_exec_id='73234077'
+
+
+SQL_ID	      SQL_EXEC_ID TRUNC(SAM
+------------- ----------- ---------
+ascgd1d0nn43q	 16777216 18-AUG-20
+ascgd1d0nn43q	 16777216 20-AUG-20
+ascgd1d0nn43q	 16777216 19-AUG-20
+ascgd1d0nn43q	 16777216 22-AUG-20
+ascgd1d0nn43q	 16777216 17-AUG-20
+ascgd1d0nn43q	 16777216 21-AUG-20,i
+Ol
+
+
+select sql_id,event,username,status,machine,sql_exec_id from gv$session where status='ACTIVE' and username is not null and sql_id='ccfrfn4vuhtt0' ;
+
+select sql_id,module,status,SQL_EXEC_ID,SQL_PLAN_HASH_VALUE from gv$sql_monitor where sql_id='3uu9nxrjz8tk8' and status='EXECUTING';
+
+
+select * from table(dbms_xplan.display_cursor('3uu9nxrjz8tk8'));
+
+set long 1000000
+set longchunksize 1000000
+set linesize 1000
+set pagesize 0
+set trim on
+set trimspool on
+set echo off
+set feedback off
+
+select dbms_sql_monitor.report_sql_monitor(
+  sql_id       => '3q8x66ztw5zyh',
+  type         => 'text',
+  report_level => 'ALL') as report
+from dual;
+
+
+ 

@@ -1,0 +1,82 @@
+SERVICE STATUS
+ 
+for i in `srvctl config`; do echo ""*******Db_Unique_name:"  $i ******"; srvctl status service -d $i ;done;
+ 
+TO GET THE SERVICES WHICH IS ONLY RUNNING
+ 
+for i in `srvctl config`; do echo ""******Db_Unique_name:"  $i *****"; srvctl status service -d $i | grep -i -w -e "running on instance(s)" ; done;
+ 
+i=scdfwatgxp1
+echo ""********Db_Unique_name:"  $i ********";
+srvctl status service -d $i | grep -i -w -e "running on instance(s)";
+ 
+ 
+SERVICE CONFIGURATION:
+ 
+for i in `srvctl config`; do echo "Db_Unique_name:"  $i; srvctl config service -d $i; done;
+ 
+i=dalukgatgxp
+echo ""********Db_Unique_name:"  $i ********";
+srvctl config service -d $i;
+ 
+DB CONFIGURATION:
+ 
+for i in `srvctl config`; do echo ""*********Db_Unique_name:" $i ******"; srvctl config database -d $i; done;
+ 
+i=dalukgatgxp
+echo ""********Db_Unique_name:"  $i ********";
+ srvctl config database -d $i;
+ 
+DB STATUS:
+ 
+for i in `srvctl config`; do echo""*******Db_Unique_name:"  $i ******"; srvctl status database -d $i -v; done;
+ 
+i=dalukgatgxp
+echo ""********Db_Unique_name:"  $i ********";
+srvctl status db -d $i -v;
+ 
+TO GET THE DB STATUS WHICH IS ONLY RUNNING:
+for i in `srvctl config`; do echo ""******Db_Unique_name:"  $i *****"; srvctl status database -d $i | grep -i -w -e "is running on node"  ; done;
+ 
+TO GET THE ROLE AND START OPTION OF THE DATABASE
+ 
+for i in `srvctl config`; do echo ""******Db_Unique_name:"  $i******"; srvctl config database -d $i | grep -i -w -e "Database role" -e "Services" -e "Start options"; done;
+ 
+i=dalukgatgxp
+echo ""********Db_Unique_name:"  $i ********";
+ srvctl config database -d $i | grep -i -w -e "Database role" -e "Services" -e "Start options";
+ 
+AVAILABLE AND PREFFERED INSTANCE AND SERVICE ROLE
+ 
+for i in `srvctl config`; do echo ""********Db_Unique_name:"  $i ********"; srvctl config service -d $i | grep -i -w -e "instances" -e "Service name" -e "Service role"; done;
+ 
+i=dalukgatgxp
+echo ""********Db_Unique_name:"  $i ********";
+ srvctl config service -d $i | grep -i -w -e "instances" -e "Service name";
+ 
+ 
+TO GET THE STATUS OF THE PARTICULAR SERVICE AND WHERE THE SERVICE IS RUNNING:
+ 
+serval=mcse.gecwalmart.com
+for i in `srvctl config`; do srvctl status service -d $i -s $serval; done >>c.txt
+cat c.txt | grep running
+rm c.txt
+ 
+TO GET THE AVAILABLE , PREFFERED AND SERVICE ROLE OF THE PARTICULAR SERVICE
+ 
+i=dalukgatgxp
+echo ""********Db_Unique_name:"  $i ********";
+srvctl config service -d $i | grep -i -w -e "instances" -e "Service name" -e "Service role";
+ 
+ 
+Brahadeesh Aniruthan 
+Oracle Database Administrator
+Brahdeesh.Aniruthan@walmartlabs.com
+Phone: +91-9566958151
+Location: India,Bangalore
+Walmart ✻ 
+Save Money. Live Better.
+Use the link below to raise Oracle related  requests
+https://jira.walmart.com/servicedesk/customer/portal/2882
+ 
+ 

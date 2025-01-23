@@ -1,0 +1,101 @@
+(DESCRIPTION =(ADDRESS = (PROTOCOL = TCP)(HOST = dfw-us-scan-pr59.prod.walmart.com)(PORT = 61290))(ADDRESS = (PROTOCOL = TCP)(HOST = cdc-us-scan-pr59.prod.walmart.com)(PORT = 61290))(LOAD_BALANCE = yes)(CONNECT_DATA =(SERVER = DEDICATED)(SERVICE_NAME = scomsp1_ops.gecwalmart.com)(FAILOVER_MODE =(TYPE = SELECT)(METHOD = BASIC)(RETRIES = 180)(DELAY = 5))))
+
+
+insert into DBI_USER.DATABASE_DETAILS_PROD (APP_NAME,database_role,DB_UNIQUE_NAME,DATABASE_NAME,DB_SCAN_NAME,SCAN_PORT,LOCAL_PORT,TIER,TENANT,LIVE_PRODUCTION,PCI_ENV,DB_SERVICE_NAMES,DATACENTER,DB_VERSION,HOME_PATH,CREATE_DATE,HOST_NODE1,HOST_NODE2,HOST_NODE3,HOST_NODE4,APP_POINTOFCONTACT,APP_DISTRIBUTION_LIST,DB_Pointofcontact,database_id,vip_node1,vip_node2,vip_node3)
+values ('SAMS_OMS_YANTRA','PRIMARY','dfwscomsp1','scomsp1','dfw-us-scan-pr59.prod.walmart.com',61290,61290,1,'SAMS','YES','NO','dfwscomsp1.gecwalmart.com','DFW','12102','/u01/app/oracle/product/12102',sysdate,'dfw-dbblx013a-08.prod.walmart.com','dfw-dbblx013b-08.prod.walmart.com','dfw-dbblx013c-08.prod.walmart.com','','Shankaranand Bhangennavar;Muzzammil Afroz;Qingsong Zhang;','SAMS ECOM Fulfillment <secomfulfi@wal-mart.com>;SamsClub.com Production Support <SAMSCLUB45@wal-mart.com>;samsclub.com OMS Engineering <SAMSOMS7@email.wal-mart.com>','Praveen Magesh;Fareedh Basha',DBI_USER.DATABASE_ID_SEQ.nextval,'dfw-us-vpr1-r59.prod.walmart.com','dfw-us-vpr2-r59.prod.walmart.com','dfw-us-vpr3-r59.prod.walmart.com');
+
+
+insert into DBI_USER.DATABASE_DETAILS_PROD (APP_NAME,database_role,DB_UNIQUE_NAME,DATABASE_NAME,DB_SCAN_NAME,SCAN_PORT,LOCAL_PORT,TIER,TENANT,LIVE_PRODUCTION,PCI_ENV,DB_SERVICE_NAMES,DATACENTER,DB_VERSION,HOME_PATH,CREATE_DATE,HOST_NODE1,HOST_NODE2,HOST_NODE3,HOST_NODE4,APP_POINTOFCONTACT,APP_DISTRIBUTION_LIST,DB_Pointofcontact,database_id,vip_node1,vip_node2,vip_node3)
+values ('SAMS_OMS_YANTRA','PHYSICAL STANDBY','cdcscomsp1','scomsp1','cdc-us-scan-pr59.prod.walmart.com',61290,61290,1,'SAMS','YES','NO','cdcscomsp1.gecwalmart.com','CDC','12102','/u01/app/oracle/product/12102',sysdate,'cdc-dbblx013a-08.prod.walmart.com','cdc-dbblx013b-08.prod.walmart.com','cdc-dbblx013c-08.prod.walmart.com','','Shankaranand Bhangennavar;Muzzammil Afroz;Qingsong Zhang;','SAMS ECOM Fulfillment <secomfulfi@wal-mart.com>;SamsClub.com Production Support <SAMSCLUB45@wal-mart.com>;samsclub.com OMS Engineering <SAMSOMS7@email.wal-mart.com>','Praveen Magesh;Fareedh Basha',DBI_USER.DATABASE_ID_SEQ.nextval,'cdc-us-vpr1-r59.prod.walmart.com','cdc-us-vpr2-r59.prod.walmart.com','cdc-us-vpr3-r59.prod.walmart.com');
+
+
+ Follow below steps for migrating sql profiles from one database to another.
+
+1. Create a staging table
+
+ 
+ 
+SQL> exec DBMS_SQLTUNE.CREATE_STGTAB_SQLPROF(table_name=>'PBRPROFILE',schema_name=>'DBA_RAJ');
+PL/SQL procedure successfully completed.
+ 
+1. Pack the profiles to the staging table 
+
+ 
+ 
+SQL> exec DBMS_SQLTUNE.PACK_STGTAB_SQLPROF (staging_table_name =>'PBRPROFILE',STAGING_SCHEMA_OWNER => 'DBA_RAJ',profile_name=>'SYS_SQLPROF_015255a4b1f40001');
+PL/SQL procedure successfully completed.
+ 
+SQL>  exec DBMS_SQLTUNE.PACK_STGTAB_SQLPROF (staging_table_name =>'PBRPROFILE',STAGING_SCHEMA_OWNER =>'DBA_RAJ',profile_name=>'SYS_SQLPROF_015253634eb20000');
+ 
+PL/SQL procedure successfully completed.
+ 
+3. Export the staging table:
+
+ 
+b2c-pre2: /oradbtrace#expdp directory=GSMPDUMP2 dumpfile=pbrsqlprofile.dmp logfile=pbrsqlprofile.log tables=DBA_RAJ.PBRPROFILE
+ 
+Export: Release 12.1.0.2.0 - Production on Thu Jan 21 14:32:42 2016
+ 
+Copyright (c) 1982, 2014, Oracle and/or its affiliates.  All rights reserved.
+ 
+Username: / as sysdba
+ 
+Connected to: Oracle Database 12c Enterprise Edition Release 12.1.0.2.0 - 64bit Production
+With the Partitioning, Real Application Clusters, Automatic Storage Management, OLAP,
+Advanced Analytics and Real Application Testing options
+Starting "SYS"."SYS_EXPORT_TABLE_09":  /******** AS SYSDBA directory=GSMPDUMP2 dumpfile=pbrsqlprofile.dmp logfile=pbrsqlprofile.log tables=DBA_RAJ.PBRPROFILE
+Estimate in progress using BLOCKS method...
+Processing object type TABLE_EXPORT/TABLE/TABLE_DATA
+Total estimation using BLOCKS method: 4.125 MB
+Processing object type TABLE_EXPORT/TABLE/TABLE
+Processing object type TABLE_EXPORT/TABLE/INDEX/STATISTICS/INDEX_STATISTICS
+Processing object type TABLE_EXPORT/TABLE/STATISTICS/TABLE_STATISTICS
+Processing object type TABLE_EXPORT/TABLE/STATISTICS/MARKER
+. . exported "DBA_RAJ"."PBRPROFILE"                      634.8 KB     161 rows
+Master table "SYS"."SYS_EXPORT_TABLE_09" successfully loaded/unloaded
+******************************************************************************
+Dump file set for SYS.SYS_EXPORT_TABLE_09 is:
+  /oradbtrace/DUMP/DUMP2/pbrsqlprofile.dmp
+Job "SYS"."SYS_EXPORT_TABLE_09" successfully completed at Thu Jan 21 14:36:05 2016 elapsed 0 00:03:17
+ 
+4. copy the dump to target db and import the table.
+
+ 
+ 
+[oracle]@[B2C-UPGR]-[DB-STCTEST12]-[/u02/db_dumps]# impdp directory=PROFILE_DUMP dumpfile=pbrsqlprofile.dmp logfile=imp_sqlprofile.log
+ 
+Import: Release 12.1.0.2.0 - Production on Thu Jan 21 14:44:27 2016
+ 
+Copyright (c) 1982, 2014, Oracle and/or its affiliates.  All rights reserved.
+ 
+Username: / as sysdba
+ 
+Connected to: Oracle Database 12c Enterprise Edition Release 12.1.0.2.0 - 64bit Production
+With the Partitioning, OLAP, Advanced Analytics and Real Application Testing options
+Master table "SYS"."SYS_IMPORT_FULL_01" successfully loaded/unloaded
+import done in AR8ISO8859P6 character set and UTF8 NCHAR character set
+export done in AR8ISO8859P6 character set and AL16UTF16 NCHAR character set
+WARNING: possible data loss in character set conversions
+Starting "SYS"."SYS_IMPORT_FULL_01":  /******** AS SYSDBA directory=PROFILE_DUMP dumpfile=pbrsqlprofile.dmp logfile=imp_sqlprofile.log
+Processing object type TABLE_EXPORT/TABLE/TABLE
+Processing object type TABLE_EXPORT/TABLE/TABLE_DATA
+. . imported "DBA_RAJ"."PBRPROFILE"                      634.8 KB     161 rows
+Processing object type TABLE_EXPORT/TABLE/INDEX/STATISTICS/INDEX_STATISTICS
+Processing object type TABLE_EXPORT/TABLE/STATISTICS/TABLE_STATISTICS
+Processing object type TABLE_EXPORT/TABLE/STATISTICS/MARKER
+Job "SYS"."SYS_IMPORT_FULL_01" successfully completed at Thu Jan 21 14:45:50 2016 elapsed 0 00:00:58
+ 
+5. Unpack the sql profiles
+
+ 
+ 
+DBA_RAJ@STCTEST12]>>]EXEC DBMS_SQLTUNE.UNPACK_STGTAB_SQLPROF(REPLACE => TRUE,staging_table_name => 'PBRPROFILE',STAGING_SCHEMA_OWNER => 'DBA_RAJ');
+ 
+PL/SQL procedure successfully completed.
+ 
+
+
+   
+ 
+ 
+
