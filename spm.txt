@@ -1,0 +1,119 @@
+--
+exec DBMS_SQLTUNE.CREATE_SQLSET('SQLBSLN_SET');
+
+?	Find snap id intervals , sqlid, desired plan_hash_value and use below:
+
+declare
+baseline_ref_cursor DBMS_SQLTUNE.SQLSET_CURSOR;
+begin
+open baseline_ref_cursor for
+select VALUE(p) from table(DBMS_SQLTUNE.SELECT_WORKLOAD_REPOSITORY(439365, 439367,'sql_id='||CHR(39)||'3uu9nxrjz8tk8'||CHR(39)||' and plan_hash_value=3494246311',NULL,NULL,NULL,NULL,NULL,NULL,'ALL')) p;
+DBMS_SQLTUNE.LOAD_SQLSET('SQLBSLN_SET', baseline_ref_cursor);
+end;
+/
+
+
+SELECT NAME,OWNER,CREATED,STATEMENT_COUNT FROM DBA_SQLSET where name='SQLBSLN_SET';
+
+select sql_id, substr(sql_text,1, 15) text
+from dba_sqlset_statements
+where sqlset_name = 'SQLBSLN_SET'
+order by sql_id;
+
+SELECT * FROM table (DBMS_XPLAN.DISPLAY_SQLSET('SQLBSLN_SET','3uu9nxrjz8tk8'));
+
+?	Load the plan from sqlset:
+
+set serveroutput on
+declare
+my_integer pls_integer;
+begin
+my_integer := dbms_spm.load_plans_from_sqlset(sqlset_name => '3uu9nxrjz8tk8',
+                                              sqlset_owner => 'SYS',
+                                              fixed => 'NO',
+                                              enabled => 'YES');
+                                              DBMS_OUTPUT.PUT_line(my_integer);
+end;
+/
+
+----------------------------
+
+
+SQL Monitor report 
+
+select DBMS_SQLTUNE.REPORT_SQL_MONITOR(
+   type=>'HTML',
+   report_level=>'ALL',sql_id=>'8amzcgwfgcf62') as report
+FROM dual;
+
+
+-- Create SQL Tuning Set (STS)
+
+BEGIN
+  DBMS_SQLTUNE.CREATE_SQLSET(
+    sqlset_name => 'SQLBSLN_SET',
+    description => 'SQL Tuning Set for loading plan into SQL Plan Baseline');
+END;
+/
+
+- Populate STS from AWR, using a time duration when the desired plan was used
+--  List out snapshot times using :   SELECT SNAP_ID, BEGIN_INTERVAL_TIME, END_INTERVAL_TIME FROM dba_hist_snapshot ORDER BY END_INTERVAL_TIME DESC;
+--  Specify the sql_id in the basic_filter (other predicates are available, see documentation)
+
+ DECLARE
+  cur sys_refcursor;
+BEGIN
+  OPEN cur FOR
+    SELECT VALUE(P)
+    FROM TABLE(
+       dbms_sqltune.select_workload_repository(begin_snap=> 439365, end_snap=> 439367,basic_filter=>'sql_id = ''3uu9nxrjz8tk8''',attribute_list=>'ALL')
+              ) p;
+     DBMS_SQLTUNE.LOAD_SQLSET( sqlset_name=> 'SQLBSLN_SET', populate_cursor=>cur);
+  CLOSE cur;
+END;
+/
+
+-- List out SQL Tuning Set contents to check we got what we wanted
+SELECT
+  first_load_time          ,
+  executions as execs              ,
+  parsing_schema_name      ,
+  elapsed_time  / 1000000 as elapsed_time_secs  ,
+  cpu_time / 1000000 as cpu_time_secs           ,
+  buffer_gets              ,
+  disk_reads               ,
+  direct_writes            ,
+  rows_processed           ,
+  fetches                  ,
+  optimizer_cost           ,
+  sql_plan                ,
+  plan_hash_value          ,
+  sql_id                   ,
+  sql_text
+   FROM TABLE(DBMS_SQLTUNE.SELECT_SQLSET(sqlset_name => 'SQLBSLN_SET')
+             );
+			 
+			 
+-- Load desired plan from STS as SQL Plan Baseline
+-- Filter explicitly for the plan_hash_value here if you want
+DECLARE
+my_plans pls_integer;
+BEGIN
+  my_plans := DBMS_SPM.LOAD_PLANS_FROM_SQLSET(
+    sqlset_name => 'OMSSTS01', 
+    basic_filter=>'plan_hash_value = ''2954139887'''
+    );
+END;
+/
+
+SELECT * FROM table(DBMS_XPLAN.DISPLAY_AWR('<sql_id>'));
+
+-- cursor cache
+
+
+declare
+  i natural;
+begin
+  i := dbms_spm.load_plans_from_cursor_cache(sql_id =>'3uu9nxrjz8tk8',plan_hash_value=>1352887234);
+end;
+/
