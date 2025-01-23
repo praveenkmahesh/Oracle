@@ -1,0 +1,39 @@
+Clear temp files:
+
+rm -rf /usr/tmp/.oracle/* /var/tmp/.oracle/* /tmp/.oracle/* ## This command removes socket files. Please run it as root user. 
+
+Restore permissions:
+
+Check the permissions from the following 2 files which are created during Grid Infrastructure installation.
+
+In $GRID_HOME/crs/utl (for 11.2 and 12.1.0.1) and <GRID_HOME>/crs/utl/<hostname> (for 12.1.0.2) directory:
+
+- crsconfig_dirs which has all directories listed in <GRID_HOME> and their permissions
+
+- crsconfig_fileperms which has list of files and their permissions and locations in <GRID_HOME>.
+
+
+3. The permissions can be reverted back to original values with rootcrs.pl or roothas.pl.  For versions 11.2.0.3.6 and higher, there is an option -init:    
+
+Reset the permissions of all files and directories under Oracle <GRID_HOME>. Please ensure CRS is not running while performing the followings:
+
+For 11.2:
+For clustered Grid Infrastructure, as root user
+
+# cd <GRID_HOME>/crs/install/
+# ./rootcrs.pl -init
+For Standalone Grid Infrastructure, as root user
+
+# cd <GRID_HOME>/crs/install/
+# ./roothas.pl  -init
+
+For 12c:
+For clustered Grid Infrastructure, as root user
+
+# cd <GRID_HOME>/crs/install/
+
+# ./rootcrs.sh -init
+
+
+Find master node.
+oclumon manage -get MASTER

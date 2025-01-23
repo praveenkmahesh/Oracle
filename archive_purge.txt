@@ -1,0 +1,67 @@
+#!/bin/ksh
+# Script      : purge_archive_RMAN_SABIXEP.sh
+# Author      : Praveen K Magesh
+# Version     : 1.0 , Nov 2017
+# Purpose     : Purge archives older than 3 days that are applied to standby and backedup in SMO
+#
+# **************************************
+# Setting up the environment
+# **************************************
+export ORACLE_SID=SABIXEP1
+export MAIL_LIST=DBAOracleOncall@wnco.com
+export retain_days=3
+export LOG_DIR=/opt/oradm/logs/`hostname`
+
+ORAENV_ASK=NO
+. /usr/local/bin/oraenv
+
+smo backup list -profile SABIXEP_SDC  >$LOG_DIR/smo_backup_output.log
+if [ `cat $LOG_DIR/smo_backup_output.log |head -3 |tail -1 |cut -f4 -d" "` -eq SUCCESS ] && [ `cat $LOG_DIR/smo_backup_output.log |head -3 |tail -1 |cut -f1 -d" "` -eq `date +"%Y-%m-%d"` ]
+then
+echo "SMO backup was successfull last night."
+tab="V\$ARCHIVED_LOG"
+code=(`sqlplus -s '/ as sysdba' << EOF
+set pages 0 linesize 256 feedback off verify off head off echo off
+set heading off
+set serveroutput off
+select sequence# from ${tab} where applied='NO' AND DEST_ID=2 and TRUNC(NEXT_TIME)<SYSDATE-${retain_days} and rownum<2;
+exit;
+EOF`
+)
+echo $code
+if [ -z $code ]
+then
+echo "All the archive logs older than 3 days are applied to Standby."
+echo "Preparing to delete the archive logs through RMAN..."
+${ORACLE_HOME}/bin/rman target / << EOF
+delete noprompt archivelog until time 'sysdate-${retain_days}';
+exit;
+EOF
+if [ -z `find $LOG_DIR/SABIX_PURGE_RMAN_*.log -mtime +15 -exec ls {} \;` ]
+then
+echo "No older log files to delete"
+else
+find $LOG_DIR/SABIX_PURGE_RMAN_*.log -mtime +15 -exec rm {} \;
+fi
+echo "$ORACLE_SID archive daily purge using RMAN is successfull. Please check the logs in $LOG_DIR" | mailx -s "Alert: $ORACLE_SID Purge job completed successfully" $MAIL_LIST
+else
+echo "There are 3 days old archive logs still exists without being applied on to standby" | mailx -s "Alert: $ORACLE_SID Purge job failed" $MAIL_LIST
+fi
+else
+echo "Recent SMO backup was not sucessfull. Aborting the purge job.." | mailx -s "Alert: $ORACLE_SID Purge job failed" $MAIL_LIST
+fi
+
+
+
+SABIXEP_PURGE_`date +"%Y-%m-%d:%H%M%S"`
+
+
+
+
+
+SUBJECT="$ORACLE_SID Purge job aborted."
+BODY="Error- There are 3 days old archive logs still exists without being applied on to standby."
+echo "Error- There are 3 days old archive logs still exists without being applied on to standby. Job Aborted ." 
+mailx -s "$SUBJECT" $MAIL_LIST "$BODY"
+fi
+fi

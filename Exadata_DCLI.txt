@@ -1,0 +1,8 @@
+
+From cell node:
+dcli -g /root/dbs_group -l root "dbmcli -e list alerthistory"
+dcli -l root -g cell_group "cellcli -e list alerthistory"
+
+
+From compute local node:
+dbmcli  -e "list alerthistory"

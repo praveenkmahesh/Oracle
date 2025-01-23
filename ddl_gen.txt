@@ -1,0 +1,11 @@
+Foreign constraints:
+
+set long 999999
+select dbms_metadata.get_ddl('REF_CONSTRAINT','FK_CC_GIBBERISH_GINDEX','FORT') from dual;
+
+
+Cosntraints:
+
+set long 999999
+select dbms_metadata.get_ddl('CONSTRAINT','FK_CC_GIBBERISH_GINDEX','FORT') from dual;
+
